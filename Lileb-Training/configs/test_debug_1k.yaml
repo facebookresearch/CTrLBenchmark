@@ -1,0 +1,71 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        samples_per_class: [10, 20, 20]
+        split_names: ['Train', 'Val', 'Test']
+
+        concept_pool:
+            _name: synthetic_tree
+            n_attrs: 1000
+
+            n_children: [3,3,3]
+#            n_children: [5,5,4]
+#            n_children: [3,5,7]
+
+        transformation_pool:
+            _name: noisy_nn_x_transformation
+            n_canonic_transfo: 50
+            n_var_per_trans: 20
+#            degree: 3
+
+        strat:
+            _name: mixed
+            domain: xyz
+            strategies:
+                x:
+                    _name: transfo
+                    n_initial_classes: 2
+                y:
+                    _name: attributes
+                    resample_classes: true
+                    n_initial_classes: 27
+                z:
+                    _name: split
+                    n_initial_classes: 2
+                    reuse_attrs: false
+                    exclusive: False
+#            n_initial_classes: 5
+
+modules:
+    ll_models:
+        _name: test-models-dict
+
+optimizers:
+    optim:
+        _name: adam
+        _modules: []
+
+experiment:
+    _name: lifelong_exp
+    name: salut
+
+    smoke_test: true
+    use_ray: false
+    use_threads: True
+    local_mode: true
+    use_ray_logging: False
+#    local_mode: true
+    n_it_max: 15
+    grace_period: 5
+    log_steps: [1, 2, 3, 5]
+#    norm_models: [inde, inde-upper-bound]
+    norm_models: []
+#    log_steps: [15]
+
+    n_tasks: 1000
+    plot_tasks: false
+    resources:
+        cpu: 2
+        gpu: 0
+
+#seed: 1

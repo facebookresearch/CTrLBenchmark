@@ -1,0 +1,63 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        samples_per_class: [100, 200, 200]
+        split_names: ['Train', 'Val', 'Test']
+
+        concept_pool:
+#            _name: mnist_tree
+            _name: synthetic_tree
+            n_attrs: 50
+
+            scale_fact: 0.7
+            cov_scale: 0.15
+#            n_samples_per_concept: [100, 100, 500]
+        transformation_pool:
+#            _name: randperm_x_transformation
+            _name: nn_x_transformation
+            depth: 2
+            degree: 1
+#            _name: noisy_nn_x_transformation
+#            _name: rot_x_transformation
+        strat:
+            _name: attributes
+            n_initial_classes: 27
+#            _name: random
+modules:
+    ll_models:
+        same-model:
+            _name: same-model
+        new-head:
+            _name: new-head
+        inde:
+            _name: independent
+        multitask-head:
+            _name: multitask-head
+        new-leg:
+            _name: new-leg
+        finetune-mt-head:
+            _name: finetune-head
+        multitask-leg:
+            _name: multitask-leg
+        finetune-mt-leg:
+            _name: finetune-leg
+
+optimizers:
+    optim:
+        _name: adam
+        _modules: [same-model, inde, new-head, multitask-head, finetune-mt-head,
+                   new-leg, multitask-leg, finetune-mt-leg]
+
+experiment:
+    _name: lifelong_exp
+
+    n_it_max: 3000
+    grace_period: 1000
+
+    log_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    n_tasks: 50
+
+    patience: 500
+
+#seed: 1

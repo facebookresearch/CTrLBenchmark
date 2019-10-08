@@ -1,0 +1,25 @@
+bs4
+lxml
+pydot
+tqdm
+numpy
+torch
+pydot
+pandas
+plotly
+psutil
+sacred
+pymongo
+networkx
+json2html
+torchvision
+scikit-learn
+pytorch-ignite
+
+# git+git://github.com/IDSIA/sacred.git
+git+git://github.com/facebookresearch/visdom.git
+git+git://github.com/pytorch/ignite.git
+-e git+ssh://git@github.com/fairinternal/Lileb.git@dev#egg=lileb
+
+https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-0.8.0.dev3-cp37-cp37m-macosx_10_6_intel.whl ; sys_platform == "darwin"
+https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-0.8.0.dev3-cp37-cp37m-manylinux1_x86_64.whl ; sys_platform == "linux"

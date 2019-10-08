@@ -1,0 +1,68 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        samples_per_class: [1000, 200, 300]
+        concept_pool:
+#            _name: mnist_tree
+            _name: synthetic_tree
+        transformation_pool:
+#            _name: randperm_x_transformation
+            _name: nn_x_transformation
+#            _name: rot_x_transformation
+        strat:
+            _name: split
+            n_initial_classes: 2
+
+modules:
+    ll_models:
+        inde:
+            _name: independent
+        ewc:
+            _name: ewc
+            lamda: 5000
+        multihead:
+            _name: multihead
+
+        singlehead:
+            _name: singlehead
+
+        ER:
+            _name: er
+
+#    ll_models:
+#        ll_model:
+#            _name: multihead
+#        ll_model_2:
+#            _name: ewc
+
+optimizers:
+    optim:
+        _name: adam
+        _modules: [inde, multihead, ewc, singlehead, ER]
+
+#    optim:
+#        _name: sgd
+#        _modules: [ll_model]
+
+
+experiment:
+    _name: lifelong_exp
+    name: z-Gaussians
+    cuda: true
+    train: True
+    n_epochs: 5
+    n_tasks: 10
+
+    patience: -1
+    visdom_traces_folder: 'traces'
+    batch_sizes: [64, 1024]  # Train and Eval batch sizes
+
+    log_steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 100, 500, 1000]
+    auc_Ks: [1, 3, 5, 10, 30, 50, 100, 500, 1000]
+    log_epoch: False
+    normalize_auc: True
+
+    plot_tasks: True
+
+
+#seed: 1

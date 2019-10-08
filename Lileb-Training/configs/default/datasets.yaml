@@ -1,0 +1,169 @@
+###
+# Concept Pool - Z
+###
+synthetic_tree:
+    name: 'A'
+    intrinsic_dims: &idim 50
+    low_bound: -1
+    high_bound: 1
+    scale_fact: 0.7
+    mean: 0
+    cov_scale: .15
+
+    n_levels: 3
+    n_children: [3]
+
+    n_attrs: 0
+
+    n_samples_per_concept: [0,0,0]
+
+#mnist_tree:
+#    n_samples_per_concept: [-1, -1]
+
+img_ds_tree: &img
+    n_samples_per_concept: [-1, -1, -1]
+    split_seed: 17
+    data_path: /checkpoint/ranzato/datasets
+    n_attrs: 0
+
+cifar10_tree:
+    <<: *img
+    name: 'cifar10'
+    n_classes: 10
+    n_levels: 1
+    n_children: [10]
+
+cifar100_tree:
+    <<: *img
+    name: 'cifar100'
+    n_classes: 100
+    n_levels: 2
+    n_children: [20, 5]
+
+mnist_tree:
+    <<: *img
+    name: 'mnist'
+    n_classes: 10
+    n_levels: 1
+    n_children: [10]
+
+###
+# Input Transformations - X
+###
+
+x_transfo: &x_transfo
+    z_dim: *idim
+    x_dim: 100
+
+nn_x_transformation:
+    <<: *x_transfo
+    name: NN
+    non_lin: tanh
+    depth: 2
+    degree: 1
+
+vec_rot_x_transformation:
+    <<: *x_transfo
+
+    name: vec_rotations
+    fuzz_scale: 1.e-8
+    n_rotations: 50
+
+img_rot_x_transformation:
+    name: img_rotations
+    max_degrees: 180
+    n_rotations: 50
+
+rainbow_x_transformation:
+    name: rainbow
+#    n_colors: 9
+#    n_scales: 2
+#    n_rotations: 4
+
+
+randperm_x_transformation:
+    name: permutations
+    n_permutations: 50
+    x_off: 0
+    y_off: 0
+    width: 28
+    height: 28
+
+id_x_transformation:
+    name: identity
+
+noisy_nn_x_transformation:
+    <<: *x_transfo
+    name: noisy_nn
+    noise_min: -0.05
+    noise_max: 0.05
+    n_canonic_transfo: 10
+    n_var_per_trans: 10
+
+###
+# Strategies
+###
+strategy: &mut_strat
+    n_initial_classes: 27
+    use_cat_id: True
+    concepts_preferred_lca_dist: -1
+    concepts_max_lca_dist: -1
+
+
+split:
+    <<: *mut_strat
+    domain: z
+    concepts_preferred_lca_dist: 1
+    reuse_attrs: true
+    exclusive: True
+
+random:
+    <<: *mut_strat
+    domain: xyz
+    p_mutate: 1
+    p_last: 1
+    n_attr_min: 0
+    n_attr_max: 0
+    operations: 'all'
+
+incremental:
+    <<: *mut_strat
+    domain: z
+    new_class_per_task: 1
+
+transfo:
+    <<: *mut_strat
+    domain: x
+    min_edit: -1
+    max_edit: -1
+
+    repeat_trans: false
+
+data:
+    <<: *mut_strat
+    domain: data
+#    n_samples_per_task_per_class: [1, 5, 10, 50, 100, 500, 1000]
+    n_samples_per_task_per_class: [1] #, 5, 10, 50, 100, 500, 1000]
+
+
+attributes:
+    <<: *mut_strat
+    domain: y
+    n_attrs_per_task: 1
+#    use_cat_id: true
+    use_cat_id: False
+    resample_classes: False
+
+mixed:
+    domain: null
+    n_initial_classes: null
+    use_cat_id: null
+    concepts_preferred_lca_dist: null
+    concepts_max_lca_dist: null
+
+    
+# Task generator
+task_gen:
+    normalize: False
+#    samples_per_class: [-1, -1]
+    reuse_samples: false

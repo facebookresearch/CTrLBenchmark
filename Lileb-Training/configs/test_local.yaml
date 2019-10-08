@@ -1,0 +1,49 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        samples_per_class: [300, 200, 200]
+        split_names: ['Train', 'Val', 'Test']
+
+        concept_pool:
+            _name: synthetic_tree
+
+        transformation_pool:
+#            _name: randperm_x_transformation
+            _name: nn_x_transformation
+            depth: 6
+#            _name: noisy_nn_x_transformation
+#            _name: id_x_transformation
+#            _name: img_rot_x_transformation
+#            _name: rot_x_transformation
+        strat:
+#            _name: transfo
+            _name: data
+            n_initial_classes: 27
+#            _name: random
+
+modules:
+    ll_models:
+        _name: data-models-dict
+
+optimizers:
+    optim:
+        _name: adam
+        _modules: []
+
+experiment:
+    _name: lifelong_exp
+#    use_ray: False
+#    use_threads: False
+#    smoke_test: True
+
+    n_it_max: 30000
+    grace_period: 1000
+
+#    log_steps: [1000]
+
+    norm_models: []
+    n_tasks: 1
+
+    patience: 2500
+
+#seed: 1

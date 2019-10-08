@@ -1,0 +1,270 @@
+model: &model
+    n_hidden: 2
+    hidden_size: [100, 100]
+#    hidden_size: 100
+#    input_dim: 100
+#    input_dim: [3, 32, 32]
+    dropout_p: 0
+    n_convs: 2
+
+    grid_params:
+#        lr: [1.e-1, 1.e-2, 1.e-3, 1.e-4]
+        lr: [1.e-1, 1.e-2, 1.e-3]
+        wd : [0]
+#        wd : [0, 1.e-4, 1.e-5]
+#        dropout: [0]
+        dropout: [0, 0.5]
+
+independent:
+    <<: *model
+
+
+
+new-head:
+    <<: *model
+
+new-leg:
+    <<: *model
+
+same-model:
+    <<: *model
+
+multitask-head:
+    <<: *model
+
+multitask-leg:
+    <<: *model
+
+finetune-head:
+    <<: *model
+
+finetune-leg:
+    <<: *model
+
+change-layer: &change-layer
+    <<: *model
+    share_layer: [0, 0, 0,]
+    residual: False
+    stride: 2
+    k: 3
+
+independent-more-data:
+    <<: *change-layer
+    n_samples_max: 3000
+
+independent-upper-bound:
+    <<: *change-layer
+
+er:
+    <<: *model
+    mem_size_per_class: 25
+
+ewc:
+    <<: *model
+    lamda: 6000
+    fisher_estimate_samples: 1024
+
+test-models-dict:
+#    same-model:
+#        _name: same-model
+#    new-head:
+#        _name: new-head
+#    inde:
+#        _name: independent
+#    inde-more-data:
+#        _name: independent-more-data
+#    inde-upper-bound:
+#        _name: independent-upper-bound
+#        train_samples: 1000
+#    multitask-head:
+#        _name: multitask-head
+#    new-leg:
+#        _name: new-leg
+#    finetune-mt-head:
+#        _name: finetune-head
+#    multitask-leg:
+#        _name: multitask-leg
+#    finetune-mt-leg:
+#        _name: finetune-leg
+    same:
+        _name: change-layer
+        residual: False
+        share_layer: [1, 1, 1]
+    inde:
+        _name: change-layer
+        residual: False
+        share_layer: [0, 0, 0]
+#    0-0-0-inde:
+#        _name: change-layer
+#        share_layer: [0, 0, 0, 0, 0, 0]
+#    1-1-1-same:
+#        _name: change-layer
+#        share_layer: [1, 1, 1, 1, 1, 1]
+#    inde-more-data:
+#        _name: independent-more-data
+
+data-models-dict:
+    inde-1:
+        _name: independent-upper-bound
+        train_samples: 1
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-3:
+        _name: independent-upper-bound
+        train_samples: 3
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-5:
+        _name: independent-upper-bound
+        train_samples: 5
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-10:
+        _name: independent-upper-bound
+        train_samples: 10
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-50:
+        _name: independent-upper-bound
+        train_samples: 50
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+
+    inde-100:
+        _name: independent-upper-bound
+        train_samples: 100
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-500:
+        _name: independent-upper-bound
+        train_samples: 500
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+    inde-1000:
+        _name: independent-upper-bound
+        train_samples: 1000
+        grid_params:
+            lr: [1.e-2, 1.e-3]
+            wd: [0, 1.e-4]
+            dropout: [0, 0.5]
+
+test-models-resnet-dict:
+    0-0-0-inde:
+        _name: change-layer
+        residual: True
+        share_layer: [0, 0, 0, 0, 0, 0]
+    1-1-1-same:
+        _name: change-layer
+        residual: True
+        share_layer: [1, 1, 1, 1, 1, 1]
+
+
+all-models-dict:
+    inde-more-data:
+        _name: independent-more-data
+        share_layer: [0, 0, 0]
+    inde-upper-bound:
+        _name: independent-upper-bound
+        train_samples: 4000
+        share_layer: [0, 0, 0]
+#    multitask-head:
+#        _name: multitask-head
+#    new-leg:
+#        _name: new-leg
+#    finetune-mt-head:
+#        _name: finetune-head
+#    multitask-leg:
+#        _name: multitask-leg
+#    finetune-mt-leg:
+#        _name: finetune-leg
+    0-0-0-inde:
+        _name: change-layer
+        share_layer: [0, 0, 0]
+    0-0-1:
+        _name: change-layer
+        share_layer: [0, 0, 1]
+    0-1-0:
+        _name: change-layer
+        share_layer: [0, 1, 0]
+    0-1-1-leg:
+        _name: change-layer
+        share_layer: [0, 1, 1]
+    1-0-0:
+        _name: change-layer
+        share_layer: [1, 0, 0]
+    1-0-1:
+        _name: change-layer
+        share_layer: [1, 0, 1]
+    1-1-0-head:
+        _name: change-layer
+        share_layer: [1, 1, 0]
+    1-1-1-same:
+        _name: change-layer
+        share_layer: [1, 1, 1]
+
+all-models-resnet-dict:
+    inde-more-data:
+        _name: independent-more-data
+        residual: True
+        share_layer: [0, 0, 0, 0, 0, 0]
+    inde-upper-bound:
+        _name: independent-upper-bound
+        train_samples: 4000
+        residual: True
+        share_layer: [0, 0, 0, 0, 0, 0]
+#    multitask-head:
+#        _name: multitask-head
+#    new-leg:
+#        _name: new-leg
+#    finetune-mt-head:
+#        _name: finetune-head
+#    multitask-leg:
+#        _name: multitask-leg
+#    finetune-mt-leg:
+#        _name: finetune-leg
+    0-0-0-0-0-0-inde:
+        _name: change-layer
+        residual: True
+        share_layer: [0, 0, 0, 0, 0, 0]
+    0-0-1-1-1-1:
+        _name: change-layer
+        residual: True
+        share_layer: [0, 0, 1, 1, 1, 1]
+#    0-1-0:
+#        _name: change-layer
+#        residual: True
+#        share_layer: [0, 0, 0, 0, 0, 0]
+    0-1-1-1-1-1-leg:
+        _name: change-layer
+        residual: True
+        share_layer: [0, 1, 1, 1, 1, 1]
+    1-1-1-1-0-0:
+        _name: change-layer
+        residual: True
+        share_layer: [1, 1, 1, 1, 0, 0]
+#    1-0-1:
+#        _name: change-layer
+#        residual: True
+#        share_layer: [0, 0, 0, 0, 0, 0]
+    1-1-1-1-1-0-head:
+        _name: change-layer
+        residual: True
+        share_layer: [1, 1, 1, 1, 1, 0]
+    1-1-1-1-1-1-same:
+        _name: change-layer
+        residual: True
+        share_layer: [1, 1, 1, 1, 1, 1]

@@ -1,0 +1,91 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        samples_per_class: [-1, 500, 500]
+        split_names: ['Train', 'Val', 'Test']
+
+        concept_pool:
+#            _name: mnist_tree
+            _name: synthetic_tree
+            n_levels: 3
+#            n_children: [3,3,5]
+            n_children: [3]
+            scale_fact: 0.7
+            cov_scale: .15
+            n_samples_per_concept: [500, 500, 500]
+        transformation_pool:
+#            _name: randperm_x_transformation
+#            _name: nn_x_transformation
+#            _name: rot_x_transformation
+            _name: id_x_transformation
+        strat:
+            _name: data
+            n_initial_classes: 27
+            n_samples_per_task_per_class: [2, 3, 10, 50, 500]
+#            _name: transfo
+#            _name: random
+
+modules:
+    ll_models:
+#        ER:
+#            _name: er
+#        single:
+#            _name: singlehead
+#        finetune:
+#            _name: finetune
+#        ewc:
+#            _name: ewc
+#        multihead:
+#            _name: multihead
+        inde:
+            _name: independent
+            n_hidden: 0
+            input_dim: 10
+        inde_1l:
+            _name: independent
+            n_hidden: 1
+            hidden_size: 100
+            input_dim: 10
+#        multitask:
+#            _name: multitask
+
+optimizers:
+    optim:
+        _name: adam
+        _modules: [inde, inde_1l]
+#        _modules: [multitask]
+
+experiment:
+    _name: lifelong_exp
+    log_dir: /checkpoint/veniat/ray_results
+    smoke_test: false
+
+    name: data
+    cuda: true
+    use_ray: true
+    use_threads: true
+    redis_address: '100.97.17.232:6382'
+#    redis_address: ''
+    n_it_max: 1500
+    grace_period: 500
+    num_hp_samplings: 1
+
+    n_tasks: 5
+
+    patience: 500
+    visdom_traces_folder: /checkpoint/veniat/visdom_traces
+    batch_sizes: [64, 1024]  # Train and Eval batch sizes
+
+    log_steps: []
+#    log_steps: [1, 2, 3, 4, 5, 7, 10, 20, 30, 50, 100, 500, 1000]
+    auc_Ks: [1, 3, 5, 10, 30, 50, 100, 500, 1000]
+    log_epoch: False
+    log_period: 10
+    normalize_auc: True
+
+    task_save_folder: /checkpoint/veniat/datasets
+
+    plot_tasks: false
+
+
+#seed: 1
