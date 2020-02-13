@@ -1,4 +1,5 @@
 #!/bin/zsh
+# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 #source activate torch;
 HEAD_PORT=7777
