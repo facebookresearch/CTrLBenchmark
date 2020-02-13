@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 #SBATCH --job-name=lileb
 ## %j is the job id, %u is the user id
