@@ -1,4 +1,4 @@
-# Contributing to __________
+# Contributing to the LifeLongLearning Benchmark
 We want to make contributing to this project as easy and transparent as
 possible.
 
