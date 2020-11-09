@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'CTrL Benchmark'
-copyright = "2020, Tom Veniat, Ludovic Denoyer & Marc'Aurelio Ranzato"
+copyright = "2020, Facebook, Inc. and its affiliates"
 author = "Tom Veniat, Ludovic Denoyer & Marc'Aurelio Ranzato"
 
 # The full version, including alpha/beta/rc tags
