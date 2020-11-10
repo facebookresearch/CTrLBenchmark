@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 import numpy as np
 
-from ctrl.transformations.TransformationTree import TransformationTree
+from ctrl.transformations.transformation_tree import TransformationTree
 from torchvision import transforms
 from torchvision.transforms import RandomRotation
 

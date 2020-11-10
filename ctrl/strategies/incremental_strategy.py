@@ -2,7 +2,7 @@
 # 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from ctrl.tasks.strategies.task_creation_strategy import TaskCreationStrategy
+from ctrl.strategies.task_creation_strategy import TaskCreationStrategy
 
 
 class IncrementalStrategy(TaskCreationStrategy):

@@ -5,7 +5,7 @@
 from functools import partial
 
 import torch
-from ctrl.transformations.TransformationTree import TransformationTree
+from ctrl.transformations.transformation_tree import TransformationTree
 from ctrl.transformations.utils import BatchedTransformation
 from torchvision import transforms
 from torchvision.transforms import RandomAffine

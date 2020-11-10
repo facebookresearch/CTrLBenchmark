@@ -7,3 +7,7 @@ from .input_domain_strategy import InputDomainMutationStrategy
 from .label_permutation_strategy import LabelPermutationStrategy
 from .random_mutation_strategy import RandomMutationStrategy
 from .split_strategy import SplitStrategy
+from .attributes_strategy import AttributeStrategy
+from .data_strategy import DataStrategy
+from .mixed_strategy import MixedStrategy
+from .task_creation_strategy import TaskCreationStrategy

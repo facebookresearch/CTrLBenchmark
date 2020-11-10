@@ -3,7 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 import torch
-from ctrl.transformations.TransformationTree import TransformationTree
+from ctrl.transformations.transformation_tree import TransformationTree
 from torch import nn
 from tqdm import tqdm
 

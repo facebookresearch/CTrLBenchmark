@@ -15,7 +15,7 @@ import torch
 from ctrl.commons.tree import Tree
 from ctrl.distributions.distributions import IsometricTransform, \
     FuzzedExpansion
-from ctrl.transformations.TransformationPool import TransformationPool
+from ctrl.transformations.transformation_pool import TransformationPool
 from ctrl.transformations.transformation import Transformation
 from sacred.randomness import get_seed
 from scipy.stats import special_ortho_group

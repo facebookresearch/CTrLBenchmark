@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import networkx as nx
 import numpy as np
-from ctrl.tasks.strategies.task_creation_strategy import TaskCreationStrategy
+from ctrl.strategies.task_creation_strategy import TaskCreationStrategy
 
 
 class SplitStrategy(TaskCreationStrategy):

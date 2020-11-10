@@ -2,8 +2,8 @@
 # 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from ctrl.tasks.strategies.task_creation_strategy import TaskCreationStrategy
-from ctrl.transformations.IdentityTransformation import \
+from ctrl.strategies.task_creation_strategy import TaskCreationStrategy
+from ctrl.transformations.identity_transformation import \
     load_or_convert_to_image, crop_if_not_square
 from ctrl.transformations.utils import BatchedTransformation
 from torchvision.transforms import transforms

@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torchvision.transforms.functional as F
 from PIL import Image
-from ctrl.transformations.TransformationTree import TransformationTree
+from ctrl.transformations.transformation_tree import TransformationTree
 from ctrl.transformations.utils import BatchedTransformation
 from torchvision.transforms import transforms
 

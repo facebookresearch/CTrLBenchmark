@@ -2,7 +2,7 @@
 # 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from ctrl.tasks.strategies.input_domain_strategy import TaskCreationStrategy
+from ctrl.strategies.input_domain_strategy import TaskCreationStrategy
 
 
 class AttributeStrategy(TaskCreationStrategy):

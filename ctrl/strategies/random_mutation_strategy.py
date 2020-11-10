@@ -5,7 +5,7 @@
 import logging
 
 from ctrl.concepts.concept import ComposedConcept
-from ctrl.tasks.strategies.input_domain_strategy import TaskCreationStrategy
+from ctrl.strategies.input_domain_strategy import TaskCreationStrategy
 
 logger = logging.getLogger(__name__)
 

@@ -11,7 +11,7 @@ import torchvision
 from ctrl.commons.utils import format_path
 from ctrl.concepts.concept import ComposedConcept, Concept
 from ctrl.concepts.concept_tree import ConceptTree
-from ctrl.instances.Aircraft import Aircraft
+from ctrl.instances.aircraft import Aircraft
 from ctrl.instances.DTD import DTD
 from ctrl.instances.taxonomies import TAXONOMY
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN, \
