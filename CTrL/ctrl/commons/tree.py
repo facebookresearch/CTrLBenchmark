@@ -79,7 +79,7 @@ class Tree(abc.ABC):
 
         return 2 * depth_lcs / (depth_a + depth_b)
 
-    def get_compatible_nodes(self, N, exclude_nodes=None, leaf_only=False,
+    def get_compatible_nodes(self, N=None, exclude_nodes=None, leaf_only=False,
                              preferred_lca_dist=-1, max_lca_dist=-1,
                              force_nodes=None,):
         """

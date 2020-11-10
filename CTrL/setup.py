@@ -6,8 +6,8 @@ import setuptools
 
 setuptools.setup(
     name="ctrl-benchmark",
-    version="0.0.1",
-    author="Tom Veniat",
+    version="0.0.2",
+    author="Tom Veniat, Ludovic Denoyer & Marc'Aurelio Ranzato",
     description="Continual Transfer Learning Benchmark",
     packages=setuptools.find_packages(),
 )

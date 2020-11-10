@@ -220,7 +220,7 @@ def _get_samples_from_descr(main_classes, attributes,
 
 
 class TaskGenerator(object):
-    def __init__(self, concepts: ConceptTree, transformation_pool,
+    def __init__(self, concept_pool: ConceptTree, transformation_pool,
                  samples_per_class, split_names, strat, reuse_samples,
                  seed: int, flatten, n_initial_classes, use_cat_id, tta,
                  *args, **kwargs):
@@ -246,7 +246,7 @@ class TaskGenerator(object):
         self.task_pool = []
 
         self.reuse_samples = reuse_samples
-        self.concept_pool = concepts
+        self.concept_pool = concept_pool
         self.transformation_pool = transformation_pool
         assert len(samples_per_class) == len(split_names)
         self.n_samples_per_class = samples_per_class
@@ -442,6 +442,3 @@ class TaskGenerator(object):
         descr = "Task stream containing {} tasks:\n\t".format(self.n_tasks)
         tasks = '\n\t'.join(map(str, self.task_pool))
         return descr + tasks
-
-
-t = TaskGenerator()
