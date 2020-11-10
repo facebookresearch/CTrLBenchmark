@@ -8,6 +8,7 @@ setuptools.setup(
     name="ctrl-benchmark",
     version="0.0.2",
     author="Tom Veniat, Ludovic Denoyer & Marc'Aurelio Ranzato",
+    license="MIT License",
     description="Continual Transfer Learning Benchmark",
     packages=setuptools.find_packages(),
 )
