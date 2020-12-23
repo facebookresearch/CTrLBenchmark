@@ -35,13 +35,13 @@ for t in task_gen():
 ```
 
 ### Available streams:
-In the current version, only the streams of the CTrL benchmark are directly available, they can be obtained using the following names:
-$S^+$: `"s_plus"`
-$S^-$: `"s_minus"`
-$S^{in}$: `"s_in"`
-$S^{out}$: `"s_out"`
-$S^{pl}$: `"s_pl"`
-$S^{long}$: `"s_long"`
+In the current version, only the streams of the CTrL benchmark are directly available, they can be obtained by passing the following `name` arguments in `ctrl.get_stream`:
+- S<sup>+</sup>: `"s_plus"`
+- S<sup>-</sup>: `"s_minus"`
+- S<sup>in</sup>: `"s_in"`
+- S<sup>out</sup>: `"s_out"`
+- S<sup>pl</sup>: `"s_pl"`
+- S<sup>long</sup>: `"s_long"`
 
 
 See the CONTRIBUTING file for how to help out.
