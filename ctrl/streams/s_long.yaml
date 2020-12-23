@@ -1,0 +1,34 @@
+datasets:
+    task_gen:
+        _name: task_gen
+        n_initial_classes: 5
+        samples_per_class: [5000, 100, 1000]
+        split_names: ['Train', 'Val', 'Test']
+        tta: True
+
+        concept_pool:
+            _name: md_tree_nodtd
+
+        transformation_pool:
+            _name: id_x_transformation
+            format_image: True
+
+        strat:
+            _name: mixed_all
+            strategies:
+                split:
+                    _name: split
+                    traj: null
+                    concepts_preferred_lca_dist: -1
+                    with_replacement: True
+                    first_level_weighting: ds_uniform
+                data:
+                    _name: data
+                    n_samples_per_class_options: [
+                        [[1000, 500], [5, 3]],
+                        [[1000, 500], [5, 3], [5, 3], [5, 3]],
+                        [[5, 3]]
+                    ]
+                    random: True
+                    with_replacement: True
+                    steps: [20, 40]
