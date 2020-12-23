@@ -11,8 +11,7 @@ from types import SimpleNamespace
 import numpy as np
 import torch
 import torch.nn.functional as F
-from ctrl.commons.tree import Tree
-from ctrl.concepts.concept import ComposedConcept, AtomicConcept
+from ctrl.concepts.concept import ComposedConcept
 from ctrl.concepts.concept_tree import ConceptTree
 from ctrl.tasks.task import Task
 from torchvision import transforms
@@ -56,100 +55,34 @@ def augment_samples(samples):
 def _generate_samples_from_descr(categories, attributes, n_samples_per_class,
                                  augment):
     use_cat_id, attributes = attributes
-    assert use_cat_id or attributes, 'Each task should at least use the ' \
-                                     'category id or an attribute as labels'
-    if not use_cat_id:
-        all_concepts = np.array(
-            [concept for cat in categories for concept in cat])
-        all_attrs = np.array([c.attrs for c in all_concepts])
-        selected_attr = all_attrs[:, attributes[0]]
+    assert use_cat_id and not attributes, \
+        "usage of attributes isn't supporte in v1."
 
-        categories = [tuple(all_concepts[selected_attr == val])
-                    for val in np.unique(selected_attr)]
+    samples = []
+    labels = []
+    for i, cat_concepts in enumerate(categories):
+        mixture = ComposedConcept(cat_concepts, id=None)
+        cat_samples = []
+        cat_labels = []
+        for s_id, n in enumerate(n_samples_per_class):
+            split_samples, split_attrs = mixture._get_samples(n, attributes,
+                                                              split_id=s_id)
+            if s_id in augment:
+                 split_samples = augment_samples(split_samples)
+            split_labels = torch.Tensor().long()
+            cat_id = torch.tensor([i]).expand(split_samples.shape[0], 1)
+            split_labels = torch.cat([split_labels, cat_id], dim=1)
 
-    if use_cat_id or isinstance(all_concepts[0], AtomicConcept):
-        samples = []
-        labels = []
-        for i, cat_concepts in enumerate(categories):
-            mixture = ComposedConcept(cat_concepts, id=None)
-            cat_samples = []
-            cat_labels = []
-            for s_id, n in enumerate(n_samples_per_class):
-                split_samples, split_attrs = mixture._get_samples(n, attributes,
-                                                                  split_id=s_id)
-                if s_id in augment:
-                     split_samples = augment_samples(split_samples)
-                split_labels = torch.Tensor().long()
-                if use_cat_id:
-                    cat_id = torch.tensor([i]).expand(split_samples.shape[0], 1)
-                    split_labels = torch.cat([split_labels, cat_id], dim=1)
-
-                if attributes:
-                    raise NotImplementedError('Attrs aren\'t supported '
-                                              'anymore')
-                    split_labels = torch.cat([split_labels, split_attrs], dim=1)
-                cat_samples.append(split_samples)
-                cat_labels.append(split_labels)
-            samples.append(cat_samples)
-            labels.append(cat_labels)
-        if torch.is_tensor(samples[0][0]):
-            cat_func = torch.cat
-        else:
-            cat_func = np.concatenate
-        samples = (cat_func(split) for split in zip(*samples))
-        labels = (torch.cat(split) for split in zip(*labels))
+            cat_samples.append(split_samples)
+            cat_labels.append(split_labels)
+        samples.append(cat_samples)
+        labels.append(cat_labels)
+    if torch.is_tensor(samples[0][0]):
+        cat_func = torch.cat
     else:
-        # Grouping the concepts by attribute value to create the categories
-        all_concepts = np.array(
-            [concept for cat in categories for concept in cat])
-
-        samples, labels = get_samples_using_attrs(all_concepts, attributes,
-                                                  n_samples_per_class)
-
-    return samples, labels
-
-
-def get_samples_using_attrs(concepts, attrs, n_samples_per_class):
-    samples, labels = [], []
-    if isinstance(concepts[0], AtomicConcept):
-        all_attrs = np.array([c.attrs for c in concepts])
-        selected_attr = all_attrs[:, attrs[0]]
-
-        concepts = [tuple(concepts[selected_attr == val])
-                    for val in np.unique(selected_attr)]
-    else:
-        if all(c.is_static for c in concepts):
-            all_samples = []
-            all_attrs = []
-            for i in range(len(n_samples_per_class)):
-                split_samples = []
-                split_attrs = []
-                for c in concepts:
-                    c_samples, c_attributes = c._get_samples(None, attrs, i)
-                    split_samples.append(c_samples)
-                    split_attrs.append(c_attributes)
-                all_samples.append(split_samples)
-                all_attrs.append(split_attrs)
-
-            all_samples = [torch.cat(split) for split in all_samples]
-            all_attrs = [torch.cat(split) for split in all_attrs]
-
-            for n, s_samples, s_attrs in zip(n_samples_per_class, all_samples, all_attrs):
-                samples.append([])
-                labels.append([])
-                attr_values = s_attrs.unique().tolist()
-                assert len(attr_values) == 2
-                for attr_val in attr_values:
-                    mask = s_attrs[:, 0] == attr_val
-                    candiates_samples = s_samples[mask]
-                    candiates_attrs = s_attrs[mask]
-                    # assert candiates_samples.size(0) >= n
-                    selected_idx = torch.randperm(candiates_samples.size(0))[:n]
-                    samples[-1].append(candiates_samples[selected_idx])
-                    labels[-1].append(candiates_attrs[selected_idx])
-
-    samples = [torch.cat(split) for split in samples]
-    labels = [torch.cat(split) for split in labels]
+        cat_func = np.concatenate
+    samples = (cat_func(split) for split in zip(*samples))
+    labels = (torch.cat(split) for split in zip(*labels))
 
     return samples, labels
 
@@ -217,6 +150,24 @@ def _get_samples_from_descr(main_classes, attributes,
     labels = (torch.cat(y_split) for y_split in zip(*labels))
 
     return samples, labels
+
+
+class TaskGenIter(object):
+    def __init__(self, task_generator):
+        self.task_gen = task_generator
+        self.n = 0
+
+    def __next__(self):
+        if len(self.task_gen.task_pool) > self.n:
+            t = self.task_gen.task_pool[self.n]
+        else:
+            assert self.n == len(self.task_gen.task_pool)
+            try:
+                t = self.task_gen.add_task()
+            except IndexError:
+                raise StopIteration
+        self.n += 1
+        return t
 
 
 class TaskGenerator(object):
@@ -442,3 +393,7 @@ class TaskGenerator(object):
         descr = "Task stream containing {} tasks:\n\t".format(self.n_tasks)
         tasks = '\n\t'.join(map(str, self.task_pool))
         return descr + tasks
+
+    def __iter__(self):
+        return TaskGenIter(self)
+

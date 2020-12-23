@@ -11,7 +11,6 @@ import torchvision
 from ctrl.commons.utils import format_path
 from ctrl.concepts.concept import ComposedConcept, Concept
 from ctrl.concepts.concept_tree import ConceptTree
-from ctrl.instances.aircraft import Aircraft
 from ctrl.instances.DTD import DTD
 from ctrl.instances.taxonomies import TAXONOMY
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN, \
@@ -27,7 +26,6 @@ IMAGE_DS = {
     'fashion-mnist': FashionMNIST,
     'svhn': SVHN,
     'dtd': DTD,
-    'aircraft': Aircraft,
 }
 
 
@@ -72,7 +70,7 @@ class ImageConcept(Concept):
             raise NotImplementedError
 
     def _get_samples(self, n, attributes, split_id):
-        # assert not attributes, 'Can\'t use attributes with Images for now'
+        assert not attributes, 'Can\'t use attributes with Images for now'
         idx = torch.randperm(self._samples[split_id].shape[0])[:n]
         if attributes:
             selected_attributes = self.attrs[split_id][idx][:, attributes]
@@ -243,43 +241,6 @@ class ImageDatasetTree(ConceptTree):
             taxo = TAXONOMY[self.name]
             assert isinstance(taxo, list)
             return {_class: i for i, _class in enumerate(taxo)}
-
-    def init_attributes(self, n_attrs):
-        for i in range(n_attrs):
-            attr_ok = False
-            while not attr_ok:
-                attr_x = self.rnd.randrange(self.width)
-                attr_y = self.rnd.randrange(self.height)
-                self.attributes.append((attr_x, attr_y))
-                attrs = []
-                for concept in self.leaf_concepts:
-                    attrs.append(concept.get_attr(attr_x, attr_y))
-                splits = [torch.cat(s) for s in zip(*attrs)]
-                # values = [s.unique() for s in splits]
-                all_n = []
-                for s in splits:
-                    for val in s.unique():
-                        all_n.append((s == val).sum().item())
-                # all_n = [(s == val).sum().item() for s in splits for val in s.unique()]
-                m = min(all_n)
-                if m > 1000 and len(all_n) == 6:
-                    attr_ok = True
-                else:
-                    self.attributes.pop()
-
-            for concept, attr in zip(self.leaf_concepts, attrs):
-                for j, s_attr in enumerate(attr):
-                    concept.attrs[j] = torch.cat([concept.attrs[j], s_attr], dim=1)
-
-        # for concept in self.leaf_concepts:
-        #     all_pos = []
-        #     all_neg = []
-        #     for s_attr in concept.attrs:
-        #         all_pos.append(s_attr.sum())
-        #         all_neg.append((s_attr == 0).sum())
-        #     print('{}: {} positive attributes, {} neg'.format(concept.descriptor, all_pos, all_neg    ))
-        if n_attrs:
-            self.attribute_similarities = torch.ones(n_attrs, n_attrs)
 
     def plot_concepts(self, viz):
         for c in self.leaf_concepts:

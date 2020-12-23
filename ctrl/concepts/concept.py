@@ -7,7 +7,7 @@ import hashlib
 
 import numpy as np
 import torch
-from torch.distributions import MultivariateNormal, Multinomial
+from torch.distributions import Multinomial
 
 
 class Concept(abc.ABC):
@@ -19,10 +19,7 @@ class Concept(abc.ABC):
         return self._samples
 
     def get_attributes(self, attribute_ids):
-        """
-        No attributes by default
-        """
-        return None
+        raise NotImplementedError('Attrs not supported anymore')
 
     @abc.abstractmethod
     def init_samples(self, n_per_split):
@@ -34,41 +31,6 @@ class Concept(abc.ABC):
     def __hash__(self):
         h = hashlib.md5(self.descriptor.encode('utf-8')).hexdigest()
         return int(h, 16)
-
-
-class AtomicConcept(Concept):
-    def __init__(self, mean, cov, *args, **kwargs):
-        super(AtomicConcept, self).__init__(*args, **kwargs)
-        self.intrinsic_dim = mean.size(0)
-        self.intrinsic_distrib = MultivariateNormal(mean, cov)
-
-        self.mean = self.intrinsic_distrib.loc
-        self.n_components = 1
-        self.attrs = []
-
-    def init_samples(self, n_per_split):
-        assert self._samples is None
-        assert all(n >= 0 for n in
-                   n_per_split), 'n_sample must be provided for synthetic datasets'
-        self._samples = [self._get_samples(n) for n in n_per_split]
-
-    def _get_samples(self, n, attributes=None, split_id=None):
-        samples = self.intrinsic_distrib.sample((n,))
-        if attributes is not None:
-            attrs = torch.tensor(self.attrs)[attributes].expand(n, -1)
-            return samples, attrs
-        return samples
-
-    def get_atomic_concepts(self):
-        return [self]
-
-    def get_attributes(self, attribute_ids=None):
-        selected_attributes = torch.tensor(self.attrs, dtype=torch.long)
-        if attribute_ids is not None:
-            selected_attributes = selected_attributes[attribute_ids]
-        return [selected_attributes.expand(split.size(0), -1) for split in
-                self._samples]
-
 
 class ComposedConcept(Concept):
     def __init__(self, concepts, cluster_mean=None, weights=None, *args,
@@ -119,8 +81,3 @@ class ComposedConcept(Concept):
 
     def get_atomic_concepts(self):
         return sum([c.get_atomic_concepts() for c in self._concepts], [])
-
-    def get_attributes(self, attributes=None):
-        return [torch.cat(split) for split in zip(
-            *[concept.get_attributes(attributes) for concept in
-              self._concepts])]

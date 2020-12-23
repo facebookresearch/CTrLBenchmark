@@ -3,23 +3,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 import logging
-import math
 import random
 from abc import ABC
 from collections import defaultdict
 from numbers import Number
 
 import networkx as nx
-import numpy as np
-import torch
-from ctrl.commons.tree import Tree
-from ctrl.distributions.distributions import IsometricTransform, \
-    FuzzedExpansion
-from ctrl.transformations.transformation_pool import TransformationPool
-from ctrl.transformations.transformation import Transformation
-from sacred.randomness import get_seed
-from scipy.stats import special_ortho_group
 from torch import nn
+
+from ctrl.commons.tree import Tree
+from ctrl.transformations.transformation import Transformation
+from ctrl.transformations.transformation_pool import TransformationPool
 
 logger = logging.getLogger(__name__)
 
@@ -62,77 +56,6 @@ class TransformationTree(TransformationPool, Tree, ABC):
 
     def get_path_descr(self, path):
         return '->'.join([self.tree.nodes[itm]['name'] for itm in path])
-
-
-class VecRotationTransformationTree(TransformationTree):
-    def __init__(self, z_dim, x_dim, n_rotations, fuzz_scale, *args, **kwargs):
-        self.z_dim = z_dim
-        self.x_dim = x_dim
-        self.n_rotations = n_rotations
-        self.fuzz_scale = fuzz_scale
-        self.rot_dims = 2
-
-        super(VecRotationTransformationTree, self).__init__(*args, **kwargs)
-
-    def build_tree(self):
-        expension = FuzzedExpansion(self.x_dim - self.z_dim, self.fuzz_scale)
-
-        self.tree.add_node(self._node_index[self.name], name=self.name)
-        self.tree.add_node(self._node_index['expand'], name='expand')
-        self.tree.add_edge(self._node_index[self.name],
-                           self._node_index['expand'], f=expension)
-
-        for i in range(self.n_rotations):
-            node_name = 'rotate_{}'.format(i)
-            self.leaf_nodes.add(self._node_index[node_name])
-            rot = special_ortho_group.rvs(self.rot_dims,
-                                          random_state=get_seed(self.rnd))
-            high_dim_rot = torch.eye(self.x_dim)
-            # high_dim_rot[self.z_dim:, self.z_dim:] = 0
-            high_dim_rot[:self.rot_dims, :self.rot_dims] = torch.from_numpy(rot).float()
-            # high_dim_rot[-self.rot_dims:, -self.rot_dims:] = torch.from_numpy(rot).float()
-            rot = IsometricTransform(high_dim_rot)
-
-            self.tree.add_node(self._node_index[node_name], name=node_name)
-            self.tree.add_edge(self._node_index['expand'], self._node_index[node_name], f=rot)
-
-        return self._node_index[self.name]
-
-    def transformations_sim(self, t1, t2):
-        """
-        arccos((tr(R)−1)/2)
-        :param t1:
-        :param t2:
-        :return:
-        """
-        rot1 = self.tree.in_edges()[t1.path[-2:]]['f'].rotation_mat[:self.rot_dims, :self.rot_dims]
-        if np.isclose(rot1.det(), 1):
-            theta1 = torch.acos(rot1[0, 0])
-        else:
-            theta1 = torch.acos(rot1[0, 1])
-            raise ValueError
-
-
-        rot2 = self.tree.in_edges()[t2.path[-2:]]['f'].rotation_mat[:self.rot_dims, :self.rot_dims]
-        if np.isclose(rot2.det(), 1):
-            theta2 = torch.acos(rot2[0, 0])
-        else:
-            theta2 = torch.acos(rot2[0, 1])
-            raise ValueError
-
-        R = rot1 @ rot2.t()
-        # tr = R.trace()
-        # v = (tr - 1)/2
-        # sim = torch.acos(v)
-        if np.isclose(R.det(), 1):
-            theta = torch.acos(R[0, 0])
-        else:
-            theta = torch.acos(R[0, 1])
-            raise ValueError
-        # sim = torch.norm(R - torch.eye(R.size(0)))
-        sim = 1 - (theta / math.pi)
-
-        return sim
 
 
 class RandomNNTransformationTree(TransformationTree):

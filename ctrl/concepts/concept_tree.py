@@ -48,20 +48,17 @@ class ConceptTree(Tree):
         self.n_children = n_children
         # self.concepts = []
 
-        self.n_attrs = n_attrs
+        if n_attrs != 0:
+            raise ValueError('Attributes have been removed for v1.')
+
         self.attributes = []
         self.attribute_similarities = None
 
         super().__init__(*args, **kwargs)
         self.init_data(n_samples_per_concept=n_samples_per_concept)
-        self.init_attributes(self.n_attrs)
 
     @abc.abstractmethod
     def build_tree(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def init_attributes(self, n_attrs):
         raise NotImplementedError
 
     def init_data(self, n_samples_per_concept):

@@ -1,0 +1,427 @@
+img_ds_tree: &img_tree
+  n_samples_per_concept: [-1, -1, -1]
+  split_seed: 17
+  #    data_path: /local/veniat/data
+  #    data_path: /net/blackorpheus/veniat/data
+  data_path: /data/{user}/data
+  n_attrs: 0
+  img_size: [32, 32]
+
+cifar10_tree:
+  <<: *img_tree
+  name: 'cifar10'
+  n_levels: 1
+  n_children: [10]
+  val_size: 500
+
+cifar100_tree:
+  <<: *img_tree
+  name: 'cifar100'
+  n_levels: 2
+  n_children: [20, 5]
+  val_size: 50
+
+mnist_tree: &mnist
+  <<: *img_tree
+  name: 'mnist'
+  n_levels: 1
+  n_children: [10]
+  val_size: 500
+  expand_channels: True
+  img_size: [28, 28]
+
+fashion_mnist_tree:
+  <<: *mnist
+  name: 'fashion-mnist'
+
+svhn_tree:
+  <<: *img_tree
+  name: 'svhn'
+  n_levels: 1
+  n_children: [10]
+  val_size: 500
+
+dtd_tree:
+  <<: *img_tree
+  name: 'dtd'
+  n_levels: 1
+  n_children: [47]
+  val_size: 27
+
+md_tree:
+  name: 'md'
+  n_attrs: 0
+  child_1:
+    _name: mnist_tree
+    img_size: [32, 32]
+  child_2:
+    _name: svhn_tree
+  child_3:
+    _name: cifar10_tree
+  child_4:
+    _name: fashion_mnist_tree
+    img_size: [32, 32]
+  child_5:
+    _name: dtd_tree
+  child_6:
+    _name: cifar100_tree
+
+md_tree_nodtd:
+  name: 'md'
+  n_attrs: 0
+  child_1:
+    _name: mnist_tree
+    img_size: [32, 32]
+  child_2:
+    _name: svhn_tree
+  child_3:
+    _name: cifar10_tree
+  child_4:
+    _name: fashion_mnist_tree
+    img_size: [32, 32]
+  child_5:
+    _name: cifar100_tree
+
+
+
+img_rot_x_transformation:
+  name: img_rotations
+  max_degrees: 180
+  n_rotations: 50
+
+rainbow_x_transformation:
+  name: rainbow
+#    n_colors: 9
+#    n_scales: 2
+#    n_rotations: 4
+
+
+randperm_x_transformation:
+  name: permutations
+  n_permutations: 50
+  x_off: 0
+  y_off: 0
+  width: 28
+  height: 28
+  flatten: False
+
+id_x_transformation:
+  name: identity
+  format_image: False
+
+#noisy_nn_x_transformation:
+#  <<: *x_transfo
+#  name: noisy_nn
+#  noise_min: -0.05
+#  noise_max: 0.05
+#  n_canonic_transfo: 10
+#  n_var_per_trans: 10
+
+###
+# Strategies
+###
+strategy: &mut_strat
+  concepts_preferred_lca_dist: -1
+  concepts_max_lca_dist: -1
+
+
+split:
+  <<: *mut_strat
+  domain: z
+  concepts_preferred_lca_dist: 1
+  reuse_attrs: true
+  with_replacement: False
+  first_level_weighting:
+
+random:
+  <<: *mut_strat
+  domain: xyz
+  p_mutate: 1
+  p_last: 1
+  n_attr_min: 0
+  n_attr_max: 0
+  operations: 'all'
+
+incremental:
+  <<: *mut_strat
+  domain: z
+  new_class_per_task: 1
+
+transfo:
+  <<: *mut_strat
+  domain: x
+  min_edit: -1
+  max_edit: -1
+
+  trans_trajectory:
+  with_replacement: False
+
+label_permut:
+  <<: *mut_strat
+  domain: y
+
+data:
+  <<: *mut_strat
+  domain: data
+  #    n_samples_per_task_per_class: [1, 5, 10, 50, 100, 500, 1000]
+  n_samples_per_class_options: [1] #, 5, 10, 50, 100, 500, 1000]
+  random: False
+  with_replacement: False
+  max_samples:
+  min_samples:
+  decay_rate:
+  steps:
+
+
+
+attributes:
+  <<: *mut_strat
+  domain: y
+  n_attrs_per_task: 1
+  #    use_cat_id: true
+  use_cat_id: False
+  resample_classes: False
+
+mixed: &mixed
+  domain: null
+  concepts_preferred_lca_dist: null
+  concepts_max_lca_dist: null
+  random_select: True
+
+
+# Task generator
+task_gen:
+  #    normalize: False
+  #    samples_per_class: [-1, -1]
+  reuse_samples: false
+  flatten: false
+  n_initial_classes: 10
+  use_cat_id: True
+
+
+single_full_task:
+  name: null
+  ds_params:
+    root: null
+    tranform: null
+
+
+# Streams
+
+
+mixed_remember_mini:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      #            traj: [[0, 1, 2, 3, 4],
+      #                   [10, 11, 12, 13, 14],
+      #                   [20, 21, 22, 23, 24],
+      #                   [30, 31, 32, 33, 34],
+      #                   [0, 1, 2, 3, 4]]
+      traj: [[cifar10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [mnist, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [dtd, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+      concepts_max_lca_dist: 1
+    data:
+      _name: data
+      n_samples_per_class_options: [150, 15, 25, 25, 25, 5]
+      random: False
+      with_replacement: True
+
+mixed_remember:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [[cifar10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [mnist, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [dtd, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [svhn, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
+             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[400, 200],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20]]
+      random: False
+      with_replacement: False
+
+mixed_plasticity:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [[mnist, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [dtd, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [fashion-mnist, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [svhn, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [cifar10, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [400, 200]]
+      random: False
+      with_replacement: False
+
+mixed_overwrite:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [[cifar10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [mnist, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [dtd, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [svhn, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
+             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [400, 200]]
+      random: False
+      with_replacement: False
+
+mixed_split:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: False
+#            traj: [[cifar10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+#                   [mnist, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+#                   [dtd,20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+#                   [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+#                   [svhn, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
+#                   [9, 0, 1, 2, 3, 4, 5, 6, 7, 8]]
+
+mixed_new_head:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [[cifar10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [mnist, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [dtd,20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [svhn, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
+             [9, 0, 1, 2, 3, 4, 5, 6, 7, 8]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[400, 200],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20]]
+      random: False
+      with_replacement: False
+
+mixed_new_leg:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [[mnist, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+             [cifar10, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+             [dtd,20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+             [fashion-mnist, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+             [svhn, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
+             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[400, 200],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [40, 20],
+                                    [5, 3]]
+      random: False
+      with_replacement: False
+    transfo:
+      _name: transfo
+      trans_trajectory: [0, null, null, null, null, 1]
+
+mixed_transfo:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: transfo
+      with_replacement: False
+#           trans_trajectory: [0, 1, 2, 3, 0]
+
+mixed_fine_grained:
+  <<: *mixed
+  random_select: False
+  strategies:
+    split:
+      _name: split
+      with_replacement: True
+      traj: [['aquarium_fish', 'apple', 'clock',
+              'bicycle', 'baby'],
+        ['cifar100 fish', 5, 6, 7, 8, 9],
+        ['cifar100 fruit and vegetables', 10, 11, 12, 13, 14],
+        ['cifar100 household electrical devices', 15, 16, 17, 18, 19],
+        ['cifar100 vehicles 1', 20, 21, 22, 23, 24],
+        ['cifar100 people', 25, 26, 27, 28, 29],]
+    #            traj: [[0, 1, 2, 3, 4],
+    #                   [5, 6, 7, 8, 9],
+    #                   [10, 11, 12, 13, 14],
+    #                   [15, 16, 17, 18, 19],
+    #                   [20, 21, 22, 23, 24],
+    #                   [25, 26, 27, 28, 29],
+    #            ]
+    data:
+      _name: data
+      n_samples_per_class_options: [450, 50, 50, 50, 50, 50]
+      random: False
+      with_replacement: False
+
+mixed_all:
+  <<: *mixed
+  random_select: False
+  strategies:
+
+    split:
+      _name: split
+      traj: null
+      concepts_preferred_lca_dist: -1
+      with_replacement: True
+      uniform_first_level: True
+        ##                    traj: [[0, 1], [0, 1], [0, 1], [4, 5], [0, 1], [6, 7], [0, 1], [6, 7]]
+        ##                    traj: [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        ##                           [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        ##                           [11, 12, 13, 14, 15, 16, 17, 18, 19, 10],
+      ##                           [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    data:
+      _name: data
+      n_samples_per_class_options: [[10, 5], [10, 5], [1000, 500]]
+      random: True
+      with_replacement: True
