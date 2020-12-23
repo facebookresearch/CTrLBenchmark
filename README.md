@@ -1,5 +1,3 @@
-/!\ Doc in progress
-
 # Continual Transfer Learning Benchmark
 Benchmark aiming at helping research by investigating the behaviour of different models in the Lifelong Learning context.
 
@@ -43,6 +41,8 @@ In the current version, only the streams of the CTrL benchmark are directly avai
 - S<sup>pl</sup>: `"s_pl"`
 - S<sup>long</sup>: `"s_long"`
 
+
+More documentation and details on the internal components will be progressively added.
 
 See the CONTRIBUTING file for how to help out.
 
