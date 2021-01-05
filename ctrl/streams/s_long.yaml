@@ -31,4 +31,4 @@ datasets:
                     ]
                     random: True
                     with_replacement: True
-                    steps: [20, 40]
+                    steps: [33, 66]
