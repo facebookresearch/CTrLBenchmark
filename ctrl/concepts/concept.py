@@ -32,6 +32,7 @@ class Concept(abc.ABC):
         h = hashlib.md5(self.descriptor.encode('utf-8')).hexdigest()
         return int(h, 16)
 
+
 class ComposedConcept(Concept):
     def __init__(self, concepts, cluster_mean=None, weights=None, *args,
                  **kwargs):
@@ -51,20 +52,22 @@ class ComposedConcept(Concept):
             cat_func = np.concatenate
         self._samples = [cat_func(split) for split in zip(*all_samples)]
 
-    def _get_samples(self, n, attributes=None, split_id=None):
+    def _get_samples(self, n, attributes=None, split_id=None, rng=None):
         if not attributes:
             attributes = []
+        if not rng:
+            rng = np.random.default_rng()
         samples = []
         sample_attributes = []
-        samples_per_concept = Multinomial(n, probs=self.weights).sample()
-        samples_per_concept = samples_per_concept.long().tolist()
+        samples_per_concept = rng.multinomial(n, self.weights)
         for concept, n_samples in zip(self.get_atomic_concepts(),
                                       samples_per_concept):
             if n_samples == 0:
                 continue
             c_samples, c_attrs = concept._get_samples(n_samples,
                                                       attributes=attributes,
-                                                      split_id=split_id)
+                                                      split_id=split_id,
+                                                      rng=rng)
             samples.append(c_samples)
             sample_attributes.append(c_attrs)
 

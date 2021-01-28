@@ -216,3 +216,9 @@ class Task(object):
         trans_descr = self.transformation
         return descr.format(self.n_classes[0].item(), self.creator,
                             self.n_samples, trans_descr, categories)
+
+    def __eq__(self, other):
+        return all(
+            map(lambda x: torch.equal(*x),
+                zip(self.datasets[0].tensors,
+                    other.datasets[0].tensors)))

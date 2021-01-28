@@ -13,4 +13,4 @@ task_gen:
         format_image: True
 
     strat:
-        _name: mixed_remember
+        _name: mixed_plasticity
