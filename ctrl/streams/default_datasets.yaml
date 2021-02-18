@@ -1,9 +1,7 @@
 img_ds_tree: &img_tree
   n_samples_per_concept: [-1, -1, -1]
   split_seed: 17
-  #    data_path: /local/veniat/data
-  #    data_path: /net/blackorpheus/veniat/data
-  data_path: /data/{user}/data
+  data_path:
   n_attrs: 0
   img_size: [32, 32]
 
@@ -193,7 +191,6 @@ mixed: &mixed
 task_gen:
   #    normalize: False
   #    samples_per_class: [-1, -1]
-  reuse_samples: false
   flatten: false
   n_initial_classes: 10
   use_cat_id: True

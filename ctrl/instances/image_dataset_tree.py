@@ -3,12 +3,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 import logging
+from pathlib import Path
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision
-from ctrl.commons.utils import format_path
 from ctrl.concepts.concept import ComposedConcept, Concept
 from ctrl.concepts.concept_tree import ConceptTree
 from ctrl.instances.DTD import DTD
@@ -69,15 +69,20 @@ class ImageConcept(Concept):
         else:
             raise NotImplementedError
 
-    def _get_samples(self, n, attributes, split_id):
+    def _get_samples(self, n, attributes, split_id, rng):
         assert not attributes, 'Can\'t use attributes with Images for now'
-        idx = torch.randperm(self._samples[split_id].shape[0])[:n]
+        n_samples = self._samples[split_id].size(0)
+        if n_samples > n:
+            idx = rng.choice(n_samples, n, replace=False)
+            samples = self._samples[split_id][idx]
+        else:
+            samples = self._samples[split_id]
         if attributes:
             selected_attributes = self.attrs[split_id][idx][:, attributes]
         else:
             selected_attributes = None
 
-        return self._samples[split_id][idx], selected_attributes
+        return samples, selected_attributes
 
     def get_atomic_concepts(self):
         return [self]
@@ -97,7 +102,11 @@ class ImageConcept(Concept):
 class ImageDatasetTree(ConceptTree):
     def __init__(self, data_path, split_seed, img_size, val_size=None,
                  val_ratio=None, expand_channels=False, *args, **kwargs):
-        self.data_path = format_path(data_path)
+        if not data_path:
+            data_path = Path.home()/'.ctrl_data'
+            logger.warning(f'No data path specified, default to {data_path}. '
+                           f'Can be set in default_datasets.yaml:img_ds_tree')
+        self.data_path = data_path
         self.img_size = img_size
 
         # We already have rnd available from the Tree parent class, but we
@@ -135,7 +144,7 @@ class ImageDatasetTree(ConceptTree):
         self.tree.add_node(root_concept)
         for sub_concept in concepts:
             self.tree.add_edge(root_concept, sub_concept)
-        # print(trainset)dd
+
         del self.trainset, self.testset, \
             self.train_samples, self.test_samples, \
             self.train_targets, self.test_targets

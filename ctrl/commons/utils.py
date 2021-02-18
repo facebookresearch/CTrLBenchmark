@@ -2,14 +2,9 @@
 # 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-import os
 import re
 
 import plotly
-
-
-def format_path(path):
-    return path.format(user=os.environ['USER'])
 
 
 def plotly_rgb_to_hex(rgb_colors):

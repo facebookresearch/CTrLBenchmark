@@ -53,7 +53,7 @@ def augment_samples(samples):
 
 
 def _generate_samples_from_descr(categories, attributes, n_samples_per_class,
-                                 augment):
+                                 augment, rnd):
     use_cat_id, attributes = attributes
     assert use_cat_id and not attributes, \
         "usage of attributes isn't supporte in v1."
@@ -66,7 +66,7 @@ def _generate_samples_from_descr(categories, attributes, n_samples_per_class,
         cat_labels = []
         for s_id, n in enumerate(n_samples_per_class):
             split_samples, split_attrs = mixture._get_samples(n, attributes,
-                                                              split_id=s_id)
+                                                              split_id=s_id, rng=rnd)
             if s_id in augment:
                  split_samples = augment_samples(split_samples)
             split_labels = torch.Tensor().long()
@@ -83,71 +83,6 @@ def _generate_samples_from_descr(categories, attributes, n_samples_per_class,
         cat_func = np.concatenate
     samples = (cat_func(split) for split in zip(*samples))
     labels = (torch.cat(split) for split in zip(*labels))
-
-    return samples, labels
-
-
-def _get_samples_from_descr(main_classes, attributes,
-                            n_samples_per_class, rnd):
-    """
-    todo: handle attributes for composed concepts and for concepts of which
-    instances can have different values for the same attribute
-
-
-    :param main_classes: Iterable of Iterables of Concepts:
-           [[classA_concept1, classA_concept2,], [classB_concept1, ...],...]
-    :param attributes:
-    :param transformation:
-    :return:
-    """
-    use_cat_id, attributes = attributes
-    assert use_cat_id or attributes, 'Each task should at least use the ' \
-                                     'category id or an attribute as labels'
-    samples = []
-    labels = []
-    for i, cat_concepts in enumerate(main_classes):
-        # First, gather all the potential samples for the current category
-        class_samples = []
-        class_labels = []
-        for concept in cat_concepts:
-            concept_samples = concept.get_samples()
-            class_samples.append(concept_samples)
-
-            concepts_labels = []
-            concept_attributes = concept.get_attributes(attributes)
-            for j, split_samples in enumerate(concept_samples):
-                split_labels = torch.Tensor().long()
-                if use_cat_id:
-                    cat_id = torch.tensor([i]).expand(split_samples.size(0),
-                                                      1)
-                    split_labels = torch.cat([split_labels, cat_id], dim=1)
-                if concept_attributes:
-                    split_attrs = concept_attributes[j]
-                    split_labels = torch.cat([split_labels, split_attrs], dim=1)
-                concepts_labels.append(split_labels)
-            class_labels.append(concepts_labels)
-
-        class_samples = [torch.cat(split) for split in zip(*class_samples)]
-        class_labels = [torch.cat(split) for split in zip(*class_labels)]
-
-        # Then select the correct number of samples for the current class
-        samples_selection = []
-        labels_selection = []
-        for x, y, n in zip(class_samples, class_labels,
-                           n_samples_per_class):
-            if n > 0:
-                selected_idx = rnd.sample(range(x.size(0)), n)
-                x = x[selected_idx]
-                y = y[selected_idx]
-            samples_selection.append(x)
-            labels_selection.append(y)
-
-        samples.append(samples_selection)
-        labels.append(labels_selection)
-
-    # Concatenate all samples for each split
-    samples = (torch.cat(x_split) for x_split in zip(*samples))
-    labels = (torch.cat(y_split) for y_split in zip(*labels))
 
     return samples, labels
 
@@ -172,7 +107,7 @@ class TaskGenIter(object):
 
 class TaskGenerator(object):
     def __init__(self, concept_pool: ConceptTree, transformation_pool,
-                 samples_per_class, split_names, strat, reuse_samples,
+                 samples_per_class, split_names, strat,
                  seed: int, flatten, n_initial_classes, use_cat_id, tta,
                  *args, **kwargs):
         """
@@ -185,8 +120,6 @@ class TaskGenerator(object):
         :param split_names: Name of the different data splits usually
             (train, val, test)
         :param strat: Strategy to use for the creation of new tasks
-        :param reuse_samples: wether to allow the usage of the same data
-            samples in different tasks.
         :param seed: The seed used for the samples selection
         :param flatten:
         :param n_initial_classes:
@@ -196,7 +129,6 @@ class TaskGenerator(object):
         super(TaskGenerator, self).__init__(*args, **kwargs)
         self.task_pool = []
 
-        self.reuse_samples = reuse_samples
         self.concept_pool = concept_pool
         self.transformation_pool = transformation_pool
         assert len(samples_per_class) == len(split_names)
@@ -222,7 +154,7 @@ class TaskGenerator(object):
     def add_task(self, name=None, save_path=None):
         """
         Adds a new task to the current pool.
-        This task will be created using the current strategy `slef.strat`
+        This task will be created using the current strategy `self.strat`
         :param name: The name of the new task
         :param save_path: If provided, the task will be saved under this path
         :return: The new Task
@@ -349,16 +281,9 @@ class TaskGenerator(object):
     def get_samples(self, concepts, attributes, transformation,
                     n_samples_per_class):
         augment = [1] if self.tta else []
-        if self.reuse_samples:
-            samples, labels = _get_samples_from_descr(concepts,
-                                                      attributes,
-                                                      n_samples_per_class,
-                                                      self.rnd)
-        else:
-            samples, labels = _generate_samples_from_descr(concepts,
-                                                           attributes,
-                                                           n_samples_per_class,
-                                                           augment)
+        samples, labels = _generate_samples_from_descr(concepts, attributes,
+                                                       n_samples_per_class,
+                                                       augment, np.random.default_rng(self.rnd.randint(0, int(1e9))))
         # Apply the input transformation
         samples = [transformation(x) for x in samples]
 

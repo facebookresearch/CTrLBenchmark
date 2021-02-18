@@ -9,7 +9,7 @@ from os import path
 from copy import deepcopy
 
 import yaml
-from numpy.random._generator import default_rng
+from numpy.random import default_rng
 
 from ctrl.instances.image_dataset_tree import ImageDatasetTree
 from ctrl.instances.md_tree import MultiDomainDatasetTree
@@ -136,12 +136,12 @@ def init_component(_rnd, **kwargs):
         return kwargs
 
 
-def get_stream(name):
+def get_stream(name, seed=None):
     config_path = path.join(path.dirname(__file__), f'{name}.yaml')
     stream_config = load_yaml(config_path)
     config = load_default_config(stream_config)
     recursive_update(config, stream_config)
-    return init_component(default_rng(), **config)['task_gen']
+    return init_component(default_rng(seed), **config)['task_gen']
 
 
 
