@@ -1,5 +1,9 @@
 # Continual Transfer Learning Benchmark
-Benchmark aiming at helping research by investigating the behaviour of different models in the Lifelong Learning context.
+The CTrL benchmark aims to help research by studying the transfer behaviour of different models in the Lifelong Learning context.
+
+For a quick presentation of the benchmark, please check out [this blog post](https://ai.facebook.com/blog/ctrl-and-mntdp-a-new-open-source-benchmark-and-model-for-continual-learning/).
+
+For more details, the paper is available on [arxiv](https://arxiv.org/abs/2012.12631).
 
 ## Creating a Stream:
 
