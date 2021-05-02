@@ -4,10 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 import setuptools
 
-
 setuptools.setup(
     name="ctrl-benchmark",
-    version="0.0.2",
+    version="0.0.3",
     author="Tom Veniat, Ludovic Denoyer & Marc'Aurelio Ranzato",
     license="MIT License",
     description="Continual Transfer Learning Benchmark",
@@ -20,7 +19,7 @@ setuptools.setup(
         'plotly',
         'pydot',
         'tqdm',
-        'sacred',
         'sklearn'
-    ]
+    ],
+    include_package_data=True,
 )

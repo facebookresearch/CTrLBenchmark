@@ -104,8 +104,6 @@ class ImageDatasetTree(ConceptTree):
                  val_ratio=None, expand_channels=False, *args, **kwargs):
         if not data_path:
             data_path = Path.home()/'.ctrl_data'
-            logger.warning(f'No data path specified, default to {data_path}. '
-                           f'Can be set in default_datasets.yaml:img_ds_tree')
         self.data_path = data_path
         self.img_size = img_size
 

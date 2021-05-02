@@ -1,0 +1,7 @@
+include ctrl/streams/s_in.yaml
+include ctrl/streams/s_out.yaml
+include ctrl/streams/s_pl.yaml
+include ctrl/streams/s_minus.yaml
+include ctrl/streams/s_plus.yaml
+include ctrl/streams/s_long.yaml
+include ctrl/streams/default_datasets.yaml

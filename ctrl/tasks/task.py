@@ -77,6 +77,8 @@ class Task(object):
             mean = train_split.mean()
             std = train_split.std()
 
+        # Prevent division by 0 if we have a constant channel
+        std = [1 if itm == 0 else itm for itm in std]
         return {'mean': mean, 'std': std}
 
     @property

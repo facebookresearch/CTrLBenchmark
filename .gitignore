@@ -7,7 +7,3 @@ dist/
 *.egg-info
 
 __pycache__/
-resources/
-
-Lileb-Training/wandb
-Lileb-Training/results

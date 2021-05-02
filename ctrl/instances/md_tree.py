@@ -6,7 +6,6 @@ import networkx as nx
 import numpy as np
 import torch
 import torchvision
-from sacred.optional import yaml
 
 from ctrl.concepts.concept import ComposedConcept
 from ctrl.concepts.concept_tree import ConceptTree
