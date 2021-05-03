@@ -19,7 +19,8 @@ setuptools.setup(
         'plotly',
         'pydot',
         'tqdm',
-        'sklearn'
+        'sklearn',
+        'bs4'
     ],
     include_package_data=True,
 )
