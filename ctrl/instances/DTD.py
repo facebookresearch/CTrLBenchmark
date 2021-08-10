@@ -11,7 +11,6 @@ import numpy as np
 import torch
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import pil_loader
-from torchvision.datasets.utils import download_and_extract_archive
 from tqdm import tqdm
 
 import tarfile
@@ -35,14 +34,11 @@ def untar(path):
 def download(url, path):
     if not os.path.exists(path):
         os.makedirs(path)
-
     file_name = os.path.join(path, url.split("/")[-1])
-
     if os.path.exists(file_name):
         print(f"Dataset already downloaded at {file_name}.")
     else:
         urllib.request.urlretrieve(url, file_name)
-
     return file_name
 
 class DTD(VisionDataset):
