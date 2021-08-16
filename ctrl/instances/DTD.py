@@ -11,9 +11,11 @@ import numpy as np
 import torch
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import pil_loader
-from torchvision.datasets.utils import download_and_extract_archive
-from tqdm import tqdm
+from torchvision.datasets.utils import gen_bar_updater
 
+from tqdm import tqdm
+import tarfile
+import urllib
 
 def center_crop(img, size):
     width, height = img.size
@@ -25,6 +27,20 @@ def center_crop(img, size):
 
     return img.crop((left, top, right, bottom))
 
+def untar(path):
+    directory_path = os.path.dirname(path)
+    with tarfile.open(path) as tar_file:
+        tar_file.extractall(directory_path)
+
+def download(url, path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    file_name = os.path.join(path, url.split("/")[-1])
+    if os.path.exists(file_name):
+        print(f"Dataset already downloaded at {file_name}.")
+    else:
+        urllib.request.urlretrieve(url, file_name, reporthook=gen_bar_updater())
+    return file_name
 
 class DTD(VisionDataset):
     folder_name = 'dtd'
@@ -44,7 +60,14 @@ class DTD(VisionDataset):
         self.data, self.labels, self.classes = torch.load(pr_file)
 
     def _download_and_prepare(self, root, split, img_size):
-        download_and_extract_archive(self.url, download_root=root)
+        archive_path = os.path.join(root, "dtd-r1.0.1.tar.gz")
+        if not os.path.exists(archive_path):
+            print("Downloading DTD dataset...")
+            download(self.url, root)
+
+        if not os.path.exists(os.path.join(root, "dtd")):
+            print("Uncompressing images...")
+            untar(archive_path)
         self._prepare(root, split, img_size)
 
     def _prepare(self, root, split, img_size):
