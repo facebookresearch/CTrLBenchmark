@@ -11,8 +11,9 @@ import numpy as np
 import torch
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import pil_loader
-from tqdm import tqdm
+from torchvision.datasets.utils import gen_bar_updater
 
+from tqdm import tqdm
 import tarfile
 import urllib
 
@@ -38,7 +39,7 @@ def download(url, path):
     if os.path.exists(file_name):
         print(f"Dataset already downloaded at {file_name}.")
     else:
-        urllib.request.urlretrieve(url, file_name)
+        urllib.request.urlretrieve(url, file_name, reporthook=gen_bar_updater())
     return file_name
 
 class DTD(VisionDataset):
