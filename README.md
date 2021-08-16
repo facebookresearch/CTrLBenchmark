@@ -20,7 +20,7 @@ Each of these components can be created by hand or using our automatic `TaskGene
 For examples simply executing
 ```python
 import ctrl
-task_gen = CTrl.get_stream('s_minus')
+task_gen = ctrl.get_stream('s_minus')
 ```
 will return the corresponding task generator that be used either directy to generate tasks on the fly:
 ```python
@@ -32,8 +32,8 @@ t3 = task_gen.add_task()
 
 or as an iterator:
 ```python
-for t in task_gen():
-    ...
+for t in task_gen:
+    print(t)
 ```
 
 ### Available streams:
